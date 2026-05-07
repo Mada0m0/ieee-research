@@ -1,0 +1,11 @@
+{
+  "prompt": "在 ieee-research 仓库的 implementations/controls/ 目录下，创建 pmn_pt_shear_actuator.py 文件。实现 PMN-PT 压电单晶 d36 剪切模式执行器的模型和控制器。包含：1) ShearActuator 类：建模 d36 剪切模式的压电响应，参数包括 d36压电系数、弹性柔顺系数、介电常数、几何尺寸；2) HysteresisCompensator 类：基于前馈的迟滞补偿器，支持速率依赖补偿；3) 测试文件 test_pmn_pt_actuator.py。分支名 feat/pmn-pt-actuator。",
+  "sourceContext": {
+    "source": "sources/github/Mada0m0/ieee-research",
+    "githubRepoContext": {
+      "startingBranch": "main"
+    }
+  },
+  "title": "PMN-PT Shear Actuator Implementation",
+  "automationMode": "AUTO_CREATE_PR"
+}

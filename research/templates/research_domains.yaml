@@ -1,0 +1,143 @@
+# 压电控制研究方向配置
+# 用于 ieee-search v2.0 daily_digest
+# 位置: ~/.hermes/skills/research/ieee-search/templates/research_domains.yaml
+
+research_domains:
+
+  "压电执行器迟滞控制":
+    keywords:
+      - "piezoelectric actuator hysteresis control"
+      - "piezoelectric precision positioning compensation"
+      - "piezo-driven mechanism hysteresis"
+      - "piezoelectric stage control compensation"
+    semantic_scholar_fields:
+      - "Engineering"
+      - "Physics"
+    venue_filters:
+      - "IEEE"
+      - "Elsevier"
+      - "IOP"
+    priority: 10
+    min_citations: 0
+    year_start: 2018
+    description: "压电执行器的非线性迟滞建模与精密定位控制"
+
+  "Bouc-Wen迟滞逆模型与补偿":
+    keywords:
+      - "Bouc-Wen hysteresis model"
+      - "Bouc-Wen inverse compensation"
+      - "rate-dependent Bouc-Wen hysteresis"
+      - "Bouc-Wen parameter identification"
+      - "modified Bouc-Wen model"
+    semantic_scholar_fields:
+      - "Engineering"
+      - "Mathematics"
+    venue_filters:
+      - "IEEE"
+      - "Elsevier"
+      - "SAGE"
+    priority: 10
+    min_citations: 0
+    year_start: 2015
+    description: "Bouc-Wen迟滞模型的参数辨识、逆模型构建与补偿控制"
+
+  "PMN材料压电执行器":
+    keywords:
+      - "PMN-PT actuator piezoelectric"
+      - "lead magnesium niobate piezoelectric"
+      - "PMN material actuator control"
+      - "relaxor ferroelectric piezoelectric actuator"
+      - "PMN-PT hysteresis"
+    semantic_scholar_fields:
+      - "Materials Science"
+      - "Engineering"
+      - "Physics"
+    venue_filters:
+      - "IEEE"
+      - "IOP"
+      - "AIP"
+    priority: 8
+    min_citations: 0
+    year_start: 2010
+    description: "PMN-PT等弛豫铁电材料在压电执行器中的应用与迟滞特性"
+
+  "迟滞建模与补偿(通用)":
+    keywords:
+      - "hysteresis modeling Preisach"
+      - "Prandtl-Ishlinskii hysteresis model"
+      - "hysteresis compensation control method"
+      - "nonlinear hysteresis identification"
+      - "hysteresis inverse model feedforward"
+      - "Krasnoselskii-Pokrovskii hysteresis"
+    semantic_scholar_fields:
+      - "Engineering"
+      - "Mathematics"
+    venue_filters:
+      - "IEEE"
+      - "Elsevier"
+    priority: 7
+    min_citations: 1
+    year_start: 2018
+    description: "通用迟滞建模方法(Preisach/PI/KP)及补偿策略"
+
+  "自适应与鲁棒控制(压电)":
+    keywords:
+      - "adaptive control piezoelectric actuator"
+      - "robust control hysteresis compensation"
+      - "sliding mode control piezoelectric"
+      - "model predictive control precision positioning"
+      - "iterative learning control piezoelectric"
+    semantic_scholar_fields:
+      - "Engineering"
+    venue_filters:
+      - "IEEE"
+      - "Elsevier"
+    priority: 6
+    min_citations: 2
+    year_start: 2018
+    description: "先进控制算法(自适应/鲁棒/滑模/MPC/ILC)在压电平台的应用"
+
+  "剪切模式压电执行器":
+    keywords:
+      - "shear mode piezoelectric actuator"
+      - "shear deformation piezoelectric"
+      - "d15 mode piezoelectric actuator"
+      - "shearing piezoelectric actuator control"
+    semantic_scholar_fields:
+      - "Engineering"
+      - "Materials Science"
+    venue_filters:
+      - "IEEE"
+      - "Elsevier"
+    priority: 5
+    min_citations: 0
+    year_start: 2010
+    description: "剪切变形模式的压电执行器设计与控制"
+
+output:
+  language: "zh"
+  max_papers_per_domain: 8
+  max_total_papers: 45
+  api_timeout: 20
+  rate_limit_delay: 1.5
+  enable_notion_export: true
+  enable_obsidian_export: false
+  obsidian_vault_path: ""
+  notion_parent_page_hint: "Bouc-Wen"
+
+notion:
+  create_per_domain_page: false
+  create_summary_page: true
+  auto_create_links_table: true
+  use_callout_for_metadata: true
+  use_toggle_for_details: true
+  use_table_for_relevance: true
+
+report:
+  include_tldr: true
+  include_abstract_full: true
+  include_methodology_breakdown: true
+  include_relevance_scoring: true
+  include_citation_network: false
+  max_abstract_length: 1200
+  highlight_high_relevance: true

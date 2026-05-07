@@ -1,87 +1,262 @@
+#!/usr/bin/env python3
+"""
+IEEE Control Algorithm Research Hub
+Bridging academic research → engineering implementation
+
+研究流水线:
+  [论文搜索] → [深度分析] → [代码生成] → [CI/CD验证]
+     ieee_search.py  paper_analyzer.py   hub.py        pipeline.yml
+"""
+
+import os
+import sys
+import json
 import logging
+import subprocess
+from datetime import datetime
 from typing import Dict, Any, List
 
-# Setup basic logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("IEEE_Control_Hub")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S"
+)
+logger = logging.getLogger("IEEE-Hub")
 
-class Task:
-    """Represents a research task in the hub."""
-    def __init__(self, task_id: str, description: str, assignee: str = None):
-        self.task_id = task_id
-        self.description = description
-        self.assignee = assignee
-        self.status = "Pending"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+HERMES_DIR = os.path.join(SCRIPT_DIR, "agents", "hermes")
+RESEARCH_DIR = os.path.join(SCRIPT_DIR, "research", "reports")
+IMPLEMENTATIONS_DIR = os.path.join(SCRIPT_DIR, "implementations")
 
-    def __repr__(self):
-        return f"<Task {self.task_id} | Status: {self.status} | Assignee: {self.assignee}>"
 
-class CentralHub:
-    """Central scheduling and dispatch module for the IEEE Control Algorithm Research Hub."""
+class ResearchHub:
+    """Central dispatch: paper analysis → code generation"""
 
     def __init__(self):
-        self.tasks: Dict[str, Task] = {}
-        self.agents = ["Hermes", "Claude", "Jules"]
-        logger.info("Central Hub Initialized. Available Agents: %s", ", ".join(self.agents))
+        os.makedirs(RESEARCH_DIR, exist_ok=True)
+        os.makedirs(IMPLEMENTATIONS_DIR, exist_ok=True)
 
-    def create_task(self, task_id: str, description: str) -> Task:
-        """Creates a new task and adds it to the hub."""
-        if task_id in self.tasks:
-            logger.warning("Task ID %s already exists.", task_id)
-            return self.tasks[task_id]
+    # ───────── 研究阶段 ─────────
 
-        new_task = Task(task_id, description)
-        self.tasks[task_id] = new_task
-        logger.info("Created Task: %s", task_id)
-        return new_task
+    def search_papers(self, query: str, max_results: int = 5) -> List[Dict]:
+        """Step 1: 多源搜索论文（Semantic Scholar + OpenAlex）"""
+        sys.path.insert(0, HERMES_DIR)
+        from ieee_search import search_papers as ss_search
 
-    def dispatch_task(self, task_id: str, agent_name: str) -> bool:
-        """Assigns a task to a specific AI agent."""
-        if task_id not in self.tasks:
-            logger.error("Task ID %s not found.", task_id)
-            return False
+        logger.info(f"🔍 搜索论文: {query}")
+        result = ss_search(query, max_results=max_results)
+        papers = result.get("results", [])
+        logger.info(f"    → 找到 {len(papers)} 篇论文")
+        return papers
 
-        if agent_name not in self.agents:
-            logger.error("Agent %s is not registered. Available agents: %s", agent_name, self.agents)
-            return False
+    def analyze_paper(self, doi: str) -> str:
+        """Step 2: 深度分析论文 → 生成 Markdown 报告"""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        safe_doi = doi.replace("/", "_").replace(".", "_")
+        output = os.path.join(RESEARCH_DIR, f"analysis_{safe_doi}.md")
 
-        task = self.tasks[task_id]
-        task.assignee = agent_name
-        task.status = "In Progress"
-        logger.info("Dispatched Task %s to Agent %s", task_id, agent_name)
-        return True
+        logger.info(f"📖 分析论文: {doi}")
+        result = subprocess.run(
+            [sys.executable, os.path.join(HERMES_DIR, "paper_analyzer.py"),
+             "--doi", doi, "--lang", "zh", "--output", output],
+            capture_output=True, text=True, timeout=60
+        )
 
-    def complete_task(self, task_id: str) -> bool:
-        """Marks a task as completed."""
-        if task_id not in self.tasks:
-            logger.error("Task ID %s not found.", task_id)
-            return False
+        if os.path.exists(output):
+            logger.info(f"    ✅ 报告保存: {output}")
+            return output
+        else:
+            logger.error(f"    ❌ 分析失败: {result.stderr[:200]}")
+            return ""
 
-        task = self.tasks[task_id]
-        task.status = "Completed"
-        logger.info("Task %s completed by %s", task_id, task.assignee)
-        return True
+    # ───────── 代码生成阶段 ─────────
 
-    def list_tasks(self) -> List[Task]:
-        """Returns a list of all tasks."""
-        return list(self.tasks.values())
+    def generate_code(self, report_path: str, category: str = "hysteresis") -> str:
+        """Step 3: 从分析报告提取数学模型生成代码"""
+        target_dir = os.path.join(IMPLEMENTATIONS_DIR, category)
+        os.makedirs(target_dir, exist_ok=True)
 
-def main():
-    """Main execution block for demonstration."""
-    hub = CentralHub()
+        logger.info(f"⚙️  生成代码: {os.path.basename(report_path)} → {category}/")
 
-    # Example workflow
-    hub.create_task("T-001", "Analyze IEEE standard for linear controllers")
-    hub.create_task("T-002", "Implement PID controller algorithm")
+        # 读取报告提取数学模型描述
+        with open(report_path, encoding="utf-8") as f:
+            report = f.read()
 
-    hub.dispatch_task("T-001", "Claude")
-    hub.dispatch_task("T-002", "Jules")
+        # 提取摘要和方法论部分
+        sections = {"abstract": "", "methodology": "", "innovation": ""}
+        current = ""
+        for line in report.split("\n"):
+            if "## 📝 摘要" in line:
+                current = "abstract"
+            elif "## 🔬 方法论" in line:
+                current = "methodology"
+            elif "### 创新点" in line or "## 🏷️" in line:
+                current = "innovation"
+            elif line.startswith("## ") and current:
+                current = ""
 
-    hub.complete_task("T-001")
+            if current in sections:
+                sections[current] += line + "\n"
 
-    print("\nCurrent Hub Status:")
-    for task in hub.list_tasks():
-        print(f" - {task}")
+        # 构建实现 prompt
+        model_name = os.path.basename(report_path).replace(".md", "")
+        prompt = f"""
+根据以下论文分析结果，生成 Python 工程实现：
+
+论文摘要:
+{sections.get('abstract', '')[:1000]}
+
+方法论:
+{sections.get('methodology', '')[:1000]}
+
+要求:
+1. 生成 `{model_name}.py` — 核心算法模块（含类定义、方法、文档字符串）
+2. 生成 `test_{model_name}.py` — 单元测试（覆盖主要功能）
+3. 生成 `example_{model_name}.ipynb` — Jupyter 使用示例
+4. 所有代码使用 NumPy，可选的 SciPy
+5. 添加类型注解(type hints)
+"""
+
+        # 生成代码骨架
+        code = f'''"""
+{sections.get("abstract", "Model description")[:200]}
+Generated by Hermes Research Hub | {datetime.now().isoformat()}
+"""
+
+import numpy as np
+from dataclasses import dataclass, field
+from typing import Optional, Callable
+
+
+@dataclass
+class ModelConfig:
+    """Configuration parameters for the hysteresis model."""
+    sampling_rate: float = 1000.0
+    dt: float = field(init=False)
+
+    def __post_init__(self):
+        self.dt = 1.0 / self.sampling_rate
+
+
+class HysteresisModel:
+    """
+    Base class for hysteresis models derived from IEEE paper analysis.
+
+    Subclasses must implement:
+        - simulate(input_signal: np.ndarray) -> np.ndarray
+    """
+
+    def __init__(self, config: Optional[ModelConfig] = None):
+        self.config = config or ModelConfig()
+        self.state = np.array([])
+        self._validate_config()
+
+    def _validate_config(self):
+        """Validate model configuration."""
+        if self.config.dt <= 0:
+            raise ValueError("Sampling interval must be positive")
+
+    def simulate(self, input_signal: np.ndarray) -> np.ndarray:
+        """Run model simulation. Override in subclass."""
+        raise NotImplementedError
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} | config: {self.config}>"
+'''
+
+        # 写文件
+        module_path = os.path.join(target_dir, f"{model_name}.py")
+        with open(module_path, "w") as f:
+            f.write(code)
+
+        logger.info(f"    ✅ 模块生成: {module_path}")
+        return module_path
+
+    # ┌─────────────────── 批量流水线 ──────────────────────┐
+
+    def run_full_pipeline(self, query_or_doi: str, is_doi: bool = False):
+        """端到端流水线: 搜索 → 分析 → 代码生成"""
+        if is_doi:
+            report = self.analyze_paper(query_or_doi)
+            if report:
+                self.generate_code(report)
+        else:
+            papers = self.search_papers(query_or_doi, max_results=3)
+            for p in papers:
+                doi = p.get("externalIds", {}).get("DOI", "")
+                if doi:
+                    report = self.analyze_paper(doi)
+                    if report:
+                        self.generate_code(report)
+
+        logger.info("🏁 流水线完成！")
+
+    # ──────── 状态查询 ────────
+
+    def status(self):
+        """显示当前仓库状态"""
+        reports = []
+        for f in os.listdir(RESEARCH_DIR):
+            if f.endswith(".md"):
+                reports.append(f)
+
+        impls = []
+        for root, dirs, files in os.walk(IMPLEMENTATIONS_DIR):
+            for f in files:
+                if f.endswith(".py"):
+                    impls.append(os.path.relpath(os.path.join(root, f), IMPLEMENTATIONS_DIR))
+
+        return {
+            "reports": len(reports),
+            "implementations": len(impls),
+            "last_updated": datetime.now().isoformat()
+        }
+
+
+def cli():
+    hub = ResearchHub()
+    import argparse
+    parser = argparse.ArgumentParser(description="Research-to-Code Pipeline")
+    parser.add_argument("action", choices=["search", "analyze", "pipeline", "status"],
+                       help="操作类型")
+    parser.add_argument("--query", help="搜索关键词")
+    parser.add_argument("--doi", help="论文 DOI")
+    parser.add_argument("--max", type=int, default=5, help="最大搜索结果数")
+    parser.add_argument("--report", help="分析报告路径（配合代码生成）")
+
+    args = parser.parse_args()
+
+    if args.action == "search":
+        papers = hub.search_papers(args.query, args.max)
+        for i, p in enumerate(papers[:args.max]):
+            title = p.get("title", "N/A")
+            doi = p.get("externalIds", {}).get("DOI", "")
+            cites = p.get("citationCount", 0)
+            print(f"\n  {i+1}. [{cites}c] {title[:65]}")
+            if doi:
+                print(f"     DOI: {doi}")
+
+    elif args.action == "analyze":
+        if not args.doi:
+            print("❌ 需要 --doi 参数")
+            return
+        hub.analyze_paper(args.doi)
+
+    elif args.action == "pipeline":
+        if args.doi:
+            hub.run_full_pipeline(args.doi, is_doi=True)
+        elif args.query:
+            hub.run_full_pipeline(args.query)
+        else:
+            print("❌ 需要 --doi 或 --query 参数")
+
+    elif args.action == "status":
+        s = hub.status()
+        print(f"\n📊 研究枢纽状态")
+        print(f"  📄 分析报告: {s['reports']}")
+        print(f"  ⚙️  代码实现: {s['implementations']}")
+        print(f"  🕐 最后更新: {s['last_updated']}")
+
 
 if __name__ == "__main__":
-    main()
+    cli()

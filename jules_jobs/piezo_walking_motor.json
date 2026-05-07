@@ -1,0 +1,11 @@
+{
+  "prompt": "在 ieee-research 仓库的 implementations/controls/ 目录下，创建 piezo_walking_motor.py 和 test_piezo_walking_motor.py。\n\n背景：行走式压电电机（Walking Piezoelectric Motor）利用多组压电陶瓷的交替夹持-驱动循环产生宏观位移，类似「行走」步态。典型结构：4组压电叠堆——左夹持、右夹持、左驱动、右驱动。每个步态周期分四相：左夹持 -> 左驱动推进 -> 右夹持 -> 右驱动推进。相比步进式电机，行程更大、推力更高、定位精度可达纳米级。代表类型：inchworm motor、walker piezo motor。\n\n## piezo_walking_motor.py\n\n### 1. WalkingPiezoMotorPlant 类\n- 四组压电叠堆模型: left_clamp, right_clamp, left_drive, right_drive\n- 各叠堆采用简化迟滞模型（preisach 或 bouc-wen 简化形式）\n- 状态: 动子位移 x, 速度 v, 各叠堆应变\n- 参数: 各叠堆刚度 k_i、阻尼 c_i、压电系数 d_i、夹持预压力\n- gait_cycle(voltages: dict, dt) -> 步进位移\n- simulate(voltage_sequence, dt) -> 位移-时间序列\n- 关键现象: 夹持漂移、蠕变、温度效应、步距一致性\n\n### 2. WalkingGaitController 类\n- 四相步态生成: Clamp_L -> Drive_L -> Clamp_R -> Drive_R\n- 时序控制: 每相持续时间、重叠过渡区\n- 参数: 驱动电压幅值、频率、占空比\n- 对称/非对称步态模式切换\n- generate_gait(freq, amplitude, phase_delay) -> 电压序列\n- 微步进模式: 精细调整各相电压实现亚步距分辨率\n\n### 3. WalkingMotorESO 类（扩展状态观测器）\n- 4阶ESO: z1(位移), z2(速度), z3(加速度/模型不确定), z4(外部负载扰动)\n- 参数: 观测器带宽 w0\n- fal(e, alpha, delta) 非线性函数\n- update(y_meas, voltage_seq) -> 状态更新\n- 步态相位感知: 根据当前步态相调整观测器增益\n- get_estimated_states() -> 全状态估计\n\n### 4. WalkingMotorADRC 类\n- 集成: 步态规划器 + ESO + 扰动补偿 + NLSEF\n- 参数: wc(控制带宽), w0(观测器带宽), b0(控制增益矩阵)\n- 位置跟踪模式: 给定目标位移，自动生成步态序列\n- 力/速度控制模式\n- 变步长补偿: 根据 ESO 估计误差在线调整步距\n- track(target_position, dt) -> 控制电压输出序列\n- disturbance_compensation(u, z4_estimate) -> 补偿后控制量\n\n### 5. 可选的 WalkingMotorOptimizer 类\n- 步态参数优化（遗传算法或粒子群）\n- 目标函数: 步距一致性 + 速度平滑性 + 能耗最小化\n- optimize_gait(plant, target_speed, n_iter) -> 最优参数集\n\n## test_piezo_walking_motor.py\n- Plant 基本功能测试(单步/多步步态)\n- WalkingGaitController 四相时序验证\n- ESO 收敛速度测试\n- 位置跟踪精度测试(纳米级)\n- 突加负载抗扰测试\n- 步距一致性对比(开环 vs ADRC)\n- 微步进分辨率测试\n- 步态优化收敛性测试\n\n技术要求：Python 3.10+, 纯NumPy, 类型注解, 中文文档\n分支名: feat/walking-piezo-motor",
+  "sourceContext": {
+    "source": "sources/github/Mada0m0/ieee-research",
+    "githubRepoContext": {
+      "startingBranch": "main"
+    }
+  },
+  "title": "Walking Piezoelectric Motor ADRC Control",
+  "automationMode": "AUTO_CREATE_PR"
+}

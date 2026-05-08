@@ -1,6 +1,12 @@
 import unittest
 import numpy as np
-from .generalized_bouc_wen import GeneralizedBoucWen
+import sys
+import os
+
+# Add the project's root directory to the python path to import the module
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+from generalized_bouc_wen.src.generalized_bouc_wen import GeneralizedBoucWen
 
 class TestGeneralizedBoucWen(unittest.TestCase):
 

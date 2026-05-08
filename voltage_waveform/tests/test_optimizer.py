@@ -1,5 +1,5 @@
 import numpy as np
-from implementations.voltage_waveform.optimizer import WaveOptimizer
+from voltage_waveform.src.optimizer import WaveOptimizer
 
 def dummy_fitness(params: np.ndarray) -> float:
     """

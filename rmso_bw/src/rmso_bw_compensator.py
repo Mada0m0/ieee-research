@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import Callable, Tuple, Optional
 
-from implementations.hysteresis.rmso_bw_model import RMSO_BW_Model
-from implementations.controls.fuzzy_nn_controller import FuzzyNNController
+from rmso_bw.src.rmso_bw_model import RMSO_BW_Model
+from rmso_bw.src.fuzzy_nn_controller import FuzzyNNController
 
 
 class RMSO_BW_Compensator:

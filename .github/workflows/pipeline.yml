@@ -79,12 +79,12 @@ jobs:
           python hub.py pipeline --doi "${{ github.event.inputs.doi }}"
       - name: Verify generated code
         run: |
-          python -m py_compile implementations/**/*.py 2>&1 || echo "Syntax OK"
+          python -m py_compile */src/**/*.py 2>&1 || echo "Syntax OK"
       - name: Commit
         run: |
           git config user.email "ai_hermes@nousresearch.com"
           git config user.name "Hermes Agent"
-          git add implementations/ research/reports/workflow_triggered.md
+          git add */src/ research/reports/workflow_triggered.md
           git diff --cached --quiet || git commit -m "feat: auto-generated code from ${{ github.event.inputs.doi }}"
 
   # ─── 阶段三：代码质量检查 ───
@@ -106,3 +106,9 @@ jobs:
       - name: Style check
         run: |
           pycodestyle hub.py --max-line-length=100 || true
+          pycodestyle */src/ */tests/ */examples/ --max-line-length=100 || true
+      - name: Type check
+        run: mypy --ignore-missing-imports */src/ hub.py || true
+      - name: Run unit tests
+        run: |
+          pytest */tests/ -v --cov=generalized_bouc_wen/src --cov=piezo_stepper_eso/src --cov=piezo_walking_motor/src --cov=pmn_pt_shear_actuator/src --cov=rmso_bw/src --cov=voltage_waveform/src --cov-report=xml

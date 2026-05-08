@@ -1,6 +1,11 @@
 import unittest
 import numpy as np
-from piezo_stepper_eso import PiezoStepperPlant, ExtendedStateObserver, ESOController, ADRController
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+from piezo_stepper_eso.src.piezo_stepper_eso import PiezoStepperPlant, ExtendedStateObserver, ESOController, ADRController
 
 class TestPiezoStepperESO(unittest.TestCase):
 

@@ -1,5 +1,11 @@
 # IEEE 控制算法研究枢纽 (IEEE Control Algorithm Research Hub)
 
+![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)
+![Jules API](https://img.shields.io/badge/AI_Agent-Jules-orange.svg)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-brightgreen.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+本项目是一个...
 本项目是一个自动化控制算法研究与代码生成平台，通过 **Jules AI** 将从学术论文中提取的数学模型直接转化为生产级 Python 代码，并自动创建 PR、运行 CI/CD 进行质量验证。
 
 ## 架构概览

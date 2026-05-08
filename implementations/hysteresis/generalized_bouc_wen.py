@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import signal
 from typing import Tuple, List, Callable
+import matplotlib.pyplot as plt
 
 class GeneralizedBoucWen:
     """
@@ -113,6 +114,76 @@ class GeneralizedBoucWen:
 
         return F_filtered
 
+    def inverse_simulate(self, t: np.ndarray, F: np.ndarray) -> np.ndarray:
+        """
+        Simulate the inverse generalized Bouc-Wen model.
+        Calculates displacement x given restoring force F.
+        Assumes IIR filter is identity (a=[1], b=[1]) for analytical inversion.
+        F = alpha * x + z
+        dz/dt = A * dx/dt - beta * |dx/dt| * |z|^(n-1) * z - gamma * dx/dt * |z|^n
+
+        Args:
+            t: Time array
+            F: Target restoring force array
+
+        Returns:
+            np.ndarray: Displacement x
+        """
+        N = len(t)
+        if N < 2:
+            return np.zeros_like(F)
+
+        x = np.zeros(N)
+        z = np.zeros(N)
+
+        # dF/dt
+        dF = np.zeros(N)
+        dF[0] = (F[1] - F[0]) / (t[1] - t[0])
+        dF[-1] = (F[-1] - F[-2]) / (t[-1] - t[-2])
+        if N > 2:
+            dF[1:-1] = (F[2:] - F[:-2]) / (t[2:] - t[:-2])
+
+        for i in range(1, N):
+            dt = t[i] - t[i-1]
+
+            # z_term calculation
+            z_term_1 = 0.0
+            if np.abs(z[i-1]) > 0 or self.n >= 1:
+                z_term_1 = (np.abs(z[i-1]) ** (self.n - 1)) * z[i-1]
+
+            z_term_2 = 0.0
+            if np.abs(z[i-1]) > 0 or self.n >= 0:
+                z_term_2 = np.abs(z[i-1]) ** self.n
+
+            # Inverse model relationship
+            # F = alpha * x + z => dF = alpha * dx + dz
+            # dz = dx * (A - beta * sign(dx) * |z|^(n-1) * z - gamma * |z|^n)
+            # dx = dF / (alpha + A - beta * sign(dx) * |z|^(n-1) * z - gamma * |z|^n)
+
+            # Approximate sign(dx) with sign(dF) for hysteresis loop driving
+            sign_dx = np.sign(dF[i-1])
+            if sign_dx == 0:
+                sign_dx = 1.0 # Default to positive
+
+            asym_factor = 1.0 + self.delta * np.sign(x[i-1])
+
+            denominator = (self.alpha + asym_factor * self.A -
+                          self.beta * sign_dx * z_term_1 -
+                          self.gamma * z_term_2)
+
+            # Avoid division by zero
+            if np.abs(denominator) < 1e-8:
+                dx_dt = 0
+            else:
+                dx_dt = dF[i-1] / denominator
+
+            dz_dt = dF[i-1] - self.alpha * dx_dt
+
+            x[i] = x[i-1] + dx_dt * dt
+            z[i] = z[i-1] + dz_dt * dt
+
+        return x
+
     def identify_parameters_pso(self, t: np.ndarray, x: np.ndarray, F_target: np.ndarray,
                                 num_particles: int = 30, max_iter: int = 50,
                                 bounds: Tuple[np.ndarray, np.ndarray] = None) -> np.ndarray:
@@ -195,3 +266,52 @@ class GeneralizedBoucWen:
         self.set_params(gbest_position)
 
         return gbest_position
+
+    def plot_hysteresis(self, t: np.ndarray, x: np.ndarray, F: np.ndarray,
+                        F_pred: np.ndarray = None, title: str = 'Generalized Bouc-Wen Hysteresis',
+                        filename: str = 'hysteresis.png'):
+        """
+        Plot the hysteresis loop (x vs F) and time histories.
+
+        Args:
+            t: Time array
+            x: Displacement input array
+            F: Restoring force array (target or true)
+            F_pred: Predicted restoring force array (optional)
+            title: Title of the plot
+            filename: Filename to save the plot
+        """
+        fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+
+        # Plot 1: Time vs Displacement
+        axs[0].plot(t, x, 'b-', label='Displacement (x)')
+        axs[0].set_xlabel('Time (s)')
+        axs[0].set_ylabel('Displacement')
+        axs[0].set_title('Time vs Displacement')
+        axs[0].grid(True)
+        axs[0].legend()
+
+        # Plot 2: Time vs Force
+        axs[1].plot(t, F, 'k-', label='Force (True)')
+        if F_pred is not None:
+            axs[1].plot(t, F_pred, 'r--', label='Force (Pred)')
+        axs[1].set_xlabel('Time (s)')
+        axs[1].set_ylabel('Force')
+        axs[1].set_title('Time vs Force')
+        axs[1].grid(True)
+        axs[1].legend()
+
+        # Plot 3: Hysteresis Loop
+        axs[2].plot(x, F, 'k-', label='True')
+        if F_pred is not None:
+            axs[2].plot(x, F_pred, 'r--', label='Predicted')
+        axs[2].set_xlabel('Displacement (x)')
+        axs[2].set_ylabel('Force (F)')
+        axs[2].set_title('Hysteresis Loop (x vs F)')
+        axs[2].grid(True)
+        axs[2].legend()
+
+        plt.suptitle(title)
+        plt.tight_layout()
+        plt.savefig(filename)
+        plt.close()

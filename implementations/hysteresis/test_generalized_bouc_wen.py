@@ -68,5 +68,23 @@ class TestGeneralizedBoucWen(unittest.TestCase):
 
         self.assertLess(identified_mse, initial_mse)
 
+    def test_inverse_simulate(self):
+        # Create model with typical parameters
+        model = GeneralizedBoucWen(A=1.0, alpha=0.5, beta=0.1, gamma=0.1, n=1.0, delta=0.0)
+
+        # Simulate forward
+        F_sim = model.simulate(self.t, self.x)
+
+        # Simulate inverse (predict x from F_sim)
+        x_inv = model.inverse_simulate(self.t, F_sim)
+
+        # Inverse simulation often has numerical drift due to Euler integration
+        # and approximations. We check if shapes match and values are reasonably correlated.
+        self.assertEqual(x_inv.shape, self.x.shape)
+
+        # Pearson correlation should be high
+        corr = np.corrcoef(self.x, x_inv)[0, 1]
+        self.assertGreater(corr, 0.90)
+
 if __name__ == '__main__':
     unittest.main()

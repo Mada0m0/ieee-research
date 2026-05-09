@@ -5,7 +5,6 @@
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-brightgreen.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This project is a...
 This project is an automated control algorithm research and code generation platform that uses **Jules AI** to directly convert mathematical models extracted from academic papers into production-level Python code, and automatically creates PRs and runs CI/CD for quality verification.
 
 ## Architecture Overview
@@ -13,7 +12,7 @@ This project is an automated control algorithm research and code generation plat
 ```
 Research layer (hermes) Translation layer (Jules API) Code layer (GitHub)
 ieee_search.py ​​──→ paper_analyzer.py ──→ Jules job JSON ──→ Generate code + PR ──→ Merge + CI/CD
-                    (Extract mathematical model) (including prompt + source)
+(Extract mathematical model) (including prompt + source)
 ```
 
 Core components:
@@ -189,7 +188,7 @@ After merging, the generated code is included in the `implementations/` master b
    git add references/... jules_jobs/...
    git commit -m "feat: add Jules job for XXX"
    git push origin feat/new-paper-model
-   # Wait for the branch to be visible before triggering the API
+# Wait for the branch to be visible before triggering the API
    curl -X POST ... -d @jules_jobs/new_model.json
    ```
 

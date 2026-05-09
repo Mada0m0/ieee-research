@@ -1,10 +1,10 @@
-# 压电控制研究方向配置
-# 用于 ieee-search v2.0 daily_digest
-# 位置: ~/.hermes/skills/research/ieee-search/templates/research_domains.yaml
+# Piezoelectric control research direction configuration
+# for ieee-search v2.0 daily_digest
+# Location: ~/.hermes/skills/research/ieee-search/templates/research_domains.yaml
 
 research_domains:
 
-  "压电执行器迟滞控制":
+  "Piezoelectric actuator hysteresis control":
     keywords:
       - "piezoelectric actuator hysteresis control"
       - "piezoelectric precision positioning compensation"
@@ -20,9 +20,9 @@ research_domains:
     priority: 10
     min_citations: 0
     year_start: 2018
-    description: "压电执行器的非线性迟滞建模与精密定位控制"
+    description: "Nonlinear hysteresis modeling and precision positioning control of piezoelectric actuators"
 
-  "Bouc-Wen迟滞逆模型与补偿":
+  "Bouc-Wen Hysteresis Inverse Model and Compensation":
     keywords:
       - "Bouc-Wen hysteresis model"
       - "Bouc-Wen inverse compensation"
@@ -39,9 +39,9 @@ research_domains:
     priority: 10
     min_citations: 0
     year_start: 2015
-    description: "Bouc-Wen迟滞模型的参数辨识、逆模型构建与补偿控制"
+    description: "Parameter identification, inverse model construction and compensation control of Bouc-Wen hysteresis model"
 
-  "PMN材料压电执行器":
+  "PMN material piezoelectric actuator":
     keywords:
       - "PMN-PT actuator piezoelectric"
       - "lead magnesium niobate piezoelectric"
@@ -59,9 +59,9 @@ research_domains:
     priority: 8
     min_citations: 0
     year_start: 2010
-    description: "PMN-PT等弛豫铁电材料在压电执行器中的应用与迟滞特性"
+    description: "Application and hysteresis characteristics of relaxor ferroelectric materials such as PMN-PT in piezoelectric actuators"
 
-  "迟滞建模与补偿(通用)":
+  "Hysteresis Modeling and Compensation (General)":
     keywords:
       - "hysteresis modeling Preisach"
       - "Prandtl-Ishlinskii hysteresis model"
@@ -78,9 +78,9 @@ research_domains:
     priority: 7
     min_citations: 1
     year_start: 2018
-    description: "通用迟滞建模方法(Preisach/PI/KP)及补偿策略"
+    description: "General hysteresis modeling method (Preisach/PI/KP) and compensation strategy"
 
-  "自适应与鲁棒控制(压电)":
+  "Adaptive and Robust Control (Piezoelectric)":
     keywords:
       - "adaptive control piezoelectric actuator"
       - "robust control hysteresis compensation"
@@ -95,9 +95,9 @@ research_domains:
     priority: 6
     min_citations: 2
     year_start: 2018
-    description: "先进控制算法(自适应/鲁棒/滑模/MPC/ILC)在压电平台的应用"
+    description: "Application of advanced control algorithms (adaptive/robust/sliding mode/MPC/ILC) on piezoelectric platforms"
 
-  "剪切模式压电执行器":
+  "Shear Mode Piezo Actuator":
     keywords:
       - "shear mode piezoelectric actuator"
       - "shear deformation piezoelectric"
@@ -112,7 +112,7 @@ research_domains:
     priority: 5
     min_citations: 0
     year_start: 2010
-    description: "剪切变形模式的压电执行器设计与控制"
+    description: "Design and control of piezoelectric actuator in shear deformation mode"
 
 output:
   language: "zh"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""引用网络分析 — 引用图、相关论文、领域桥梁
-用法:
+"""Citation network analysis - citation map, related papers, field bridges
+usage:
     python citation_network.py --doi "10.1109/ACCESS.2020.2984645"
     python citation_network.py --sid f90836176af876cc622b7b1587641cce26e4564f
     python citation_network.py --search "piezoelectric hysteresis control" --top-cited 20
@@ -46,7 +46,7 @@ def search_top_cited(query, limit=20):
 
 
 def format_citation_network(paper, lang="zh"):
-    cn_title = "引用网络分析" if lang == "zh" else "Citation Network Analysis"
+    cn_title = "Citation Network Analysis" if lang == "zh" else "Citation Network Analysis"
     title = paper.get("title", "N/A")
     pid = paper.get("paperId", "")
     cites = paper.get("citationCount", 0)
@@ -54,7 +54,7 @@ def format_citation_network(paper, lang="zh"):
 
     output = f"""# {cn_title}
 
-## 中心论文
+## Central Paper
 - **{title}**
 - Citations: {cites} | References: {refs}
 - [S2 Link](https://www.semanticscholar.org/paper/{pid})
@@ -64,7 +64,7 @@ def format_citation_network(paper, lang="zh"):
     # Fetch citations and references
     try:
         cit_data = fetch_citations(pid, 10)
-        output += "## 📌 被以下论文引用 (Recent Citations)\n\n"
+        output += "## 📌 Cited by the following papers (Recent Citations)\n\n"
         for c in cit_data.get("data", []):
             cp = c.get("citingPaper", {})
             output += f"- [{cp.get('title','?')[:80]}]({cp.get('url','')}) — {cp.get('year','?')} ({cp.get('citationCount',0)} cites)\n"
@@ -75,7 +75,7 @@ def format_citation_network(paper, lang="zh"):
 
     try:
         ref_data = fetch_references(pid, 10)
-        output += "## 📚 引用以下论文 (References)\n\n"
+        output += "## 📚 Cite the following papers (References)\n\n"
         for r in ref_data.get("data", []):
             rp = r.get("citedPaper", {})
             output += f"- [{rp.get('title','?')[:80]}]({rp.get('url','')}) — {rp.get('year','?')} ({rp.get('citationCount',0)} cites)\n"
@@ -88,14 +88,14 @@ def format_citation_network(paper, lang="zh"):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="引用网络分析 v2.0")
+    parser = argparse.ArgumentParser(description="Quote Network Analysis v2.0")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--doi", help="DOI")
     group.add_argument("--sid", help="Semantic Scholar Paper ID")
     group.add_argument("--arxiv", help="arXiv ID")
-    group.add_argument("--search", help="搜索高被引论文")
-    parser.add_argument("--top-cited", type=int, default=20, help="最高被引数")
-    parser.add_argument("--output", help="输出文件")
+    group.add_argument("--search", help="Search for highly cited papers")
+    parser.add_argument("--top-cited", type=int, default=20, help="top-cited")
+    parser.add_argument("--output", help="output file")
     parser.add_argument("--lang", choices=["zh","en"], default="zh")
     args = parser.parse_args()
 

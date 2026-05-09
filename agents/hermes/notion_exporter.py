@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Notion 论文导出器 — 搜论文 → 深度分析 → 导出 Notion 页面
+"""Notion paper exporter — search papers → in-depth analysis → export Notion page
 
-两种模式:
-  模式A (默认):  解析论文元数据 → 构建富文本 Notion blocks
-  模式B (--attachment): 上传本地 .md → Tuple code blocks 嵌入 (原汁原味)
+Two modes:
+  Mode A (default): Parse article metadata → Build rich text Notion blocks
+  Mode B (--attachment): Upload local .md → Tuple code blocks embedded (original)
 
 Usage:
     python notion_exporter.py --search "piezo actuator Bouc-Wen" --max 3
@@ -45,7 +45,7 @@ def notion_api(endpoint, data, method="POST"):
 
 
 def notion_find_parent_page(keyword):
-    """查找合适的父页面"""
+    """Find the appropriate parent page"""
     r = notion_api("/search", {"page_size": 10, "query": keyword})
     for page in r.get("results", []):
         if page.get("object") == "page":
@@ -53,10 +53,10 @@ def notion_find_parent_page(keyword):
     return None
 
 
-# ==== 模式B: 附件上传 (.md → code blocks)  ====
+# ==== Mode B: Attachment upload (.md → code blocks) ====
 
 def md_to_code_blocks(md_text, max_len=1900):
-    """将 Markdown 文本切分为 Notion code blocks (每个 < 2000 chars)"""
+    """Cut Markdown text into Notion code blocks (each < 2000 chars)"""
     chunks = []
     current = ""
     for line in md_text.split("\n"):
@@ -77,12 +77,12 @@ def md_to_code_blocks(md_text, max_len=1900):
 
 
 def extract_metadata_from_md(md_text):
-    """从 .md 头部提取论文元数据"""
+    """Extract article metadata from .md header"""
     meta = {}
     lines = md_text.split("\n")
     for line in lines[:15]:
-        # 标题: | **标题** | xxx |
-        m = re.match(r".*\*\*标题\*\*\s*\|\s*(.+)", line)
+        # Title: | **Title** | xxx |
+        m = re.match(r".*\*\*Title\*\*\s*\|\s*(.+)", line)
         if m:
             val = m.group(1).strip().rstrip("|").strip()
             if len(val) > 3:
@@ -91,32 +91,32 @@ def extract_metadata_from_md(md_text):
         m = re.match(r".*\[(.+?)\]\(https://doi\.org/(.+?)\)", line)
         if m:
             meta["doi"] = m.group(2).strip()
-        # 发表: | **发表** | xxx |
-        m = re.match(r".*\*\*发表\*\*\s*\|\s*(.+)", line)
+        # Publish: | **Publish** | xxx |
+        m = re.match(r".*\*\*Posted\*\*\s*\|\s*(.+)", line)
         if m:
             val = m.group(1).strip().rstrip("|").strip()
             if val and len(val) > 2:
                 meta["venue"] = val
-        # 引用: | **引用数** | xxx |
-        m = re.match(r".*\*\*引用数\*\*\s*\|\s*(.+)", line)
+        # Quote: | **Number of citations** | xxx |
+        m = re.match(r".*\*\*Number of citations\*\*\s*\|\s*(.+)", line)
         if m:
             val = m.group(1).strip().rstrip("|").strip()
             if val:
                 meta["citations"] = val
-    # fallback: 从第一个 h2 或 h1 但跳过"论文深度分析报告"
+    # fallback: start from the first h2 or h1 but skip the "paper in-depth analysis report"
     if not meta.get("title"):
         for line in lines[:5]:
-            if line.startswith("## ") and "论文深度" not in line:
+            if line.startswith("## ") and "Paper Deep" not in line:
                 meta["title"] = line[2:].strip()
                 break
-            elif line.startswith("# ") and "论文深度" not in line:
+            elif line.startswith("# ") and "Paper Deep" not in line:
                 meta["title"] = line[1:].strip()
                 break
     return meta
 
 
 def export_attachment(md_path, parent_id=None):
-    """模式B: 将本地 .md 文件作为 code blocks 附件上传到 Notion"""
+    """Mode B: Upload local .md files to Notion as code blocks attachment"""
     if not os.path.exists(md_path):
         print(f"  ❌ File not found: {md_path}")
         return None
@@ -140,12 +140,12 @@ def export_attachment(md_path, parent_id=None):
     if doi:
         print(f"  🔗 DOI: {doi}")
 
-    # 构建页面: 标题 + 元数据 + toggle(完整md)
+    # Build page: title + metadata + toggle(full md)
     metadata_text = ""
     if venue:
         metadata_text += venue
     if citations:
-        metadata_text += f" • {citations} 引用"
+        metadata_text += f" • {citations} citations"
     if doi:
         metadata_text += f" • DOI: {doi}"
 
@@ -157,7 +157,7 @@ def export_attachment(md_path, parent_id=None):
         {
             "object": "block", "type": "callout",
             "callout": {
-                "rich_text": [{"type": "text", "text": {"content": metadata_text or "论文深度分析报告"}}],
+                "rich_text": [{"type": "text", "text": {"content": metadata_text or "paper in-depth analysis report"}}],
                 "icon": {"emoji": "📎"},
                 "color": "gray_background"
             }
@@ -166,7 +166,7 @@ def export_attachment(md_path, parent_id=None):
         {
             "object": "block", "type": "toggle",
             "toggle": {
-                "rich_text": [{"type": "text", "text": {"content": f"📄 完整 Markdown 分析报告 ({len(code_blocks)} 分段, {len(md_text)} 字符)"}}],
+                "rich_text": [{"type": "text", "text": {"content": f"📄 Complete Markdown analysis report ({len(code_blocks)} segments, {len(md_text)} characters)"}}],
                 "children": code_blocks
             }
         }
@@ -175,7 +175,7 @@ def export_attachment(md_path, parent_id=None):
     payload = {
         "parent": {"page_id": parent_id or ""},
         "properties": {
-            "title": {"title": [{"text": {"content": f"[附件] {title[:60]}"}}]}
+            "title": {"title": [{"text": {"content": f"[attachment] {title[:60]}"}}]}
         },
         "children": blocks
     }
@@ -195,7 +195,7 @@ def export_attachment(md_path, parent_id=None):
 
 
 def notion_find_parent_page(keyword):
-    """查找合适的父页面"""
+    """Find the appropriate parent page"""
     r = notion_api("/search", {"page_size": 10, "query": keyword})
     for page in r.get("results", []):
         if page.get("object") == "page":
@@ -204,7 +204,7 @@ def notion_find_parent_page(keyword):
 
 
 def notion_create_page(title, children, parent_id=None):
-    """创建 Notion 页面"""
+    """Create Notion page"""
     payload = {
         "parent": {"page_id": parent_id} if parent_id else {"type": "workspace"},
         "properties": {
@@ -240,7 +240,7 @@ def fetch_paper_by_doi(doi):
 # ---- Paper → Notion Blocks ----
 
 def paper_to_notion_blocks(paper, index=1):
-    """将论文信息转为 Notion content blocks"""
+    """Convert paper information into Notion content blocks"""
     title = paper.get("title", "N/A")
     year = paper.get("year", "???")
     authors = [a.get("name", "") for a in paper.get("authors", [])]
@@ -256,19 +256,19 @@ def paper_to_notion_blocks(paper, index=1):
     oa_url = oa.get("url", "") if oa else ""
     pub_date = paper.get("publicationDate", "")
 
-    # 自动评分
+    # Automatic scoring
     text = (title + " " + abstract).lower()
     score = sum(1 for t in ["piezoelectric","actuator","hysteresis","bouc-wen","pmn",
                               "control","compensation","inverse","positioning","precision"]
                 if t in text)
     stars = "⭐" * min(5, score // 2) + "☆" * max(0, 5 - score // 2)
 
-    # 是否 IEEE
+    # Whether IEEE
     is_ieee = "IEEE" in str(venue) if venue else False
 
     children = []
 
-    # Callout — 期刊信息
+    # Callout — Journal information
     callout_text = f"{'[IEEE] ' if is_ieee else ''}{venue_name}, {year}"
     if pub_date:
         callout_text += f" | Published: {pub_date}"
@@ -283,14 +283,14 @@ def paper_to_notion_blocks(paper, index=1):
         }
     })
 
-    # 标题 (H1)
+    # Title (H1)
     children.append({
         "object": "block",
         "type": "heading_1",
         "heading_1": {"rich_text": [{"type": "text", "text": {"content": title}}]}
     })
 
-    # 作者 + DOI
+    # Author + DOI
     children.append({
         "object": "block",
         "type": "paragraph",
@@ -312,12 +312,12 @@ def paper_to_notion_blocks(paper, index=1):
 
     children.append({"object": "block", "type": "divider", "divider": {}})
 
-    # Toggle: 摘要
+    # Toggle: Summary
     children.append({
         "object": "block",
         "type": "toggle",
         "toggle": {
-            "rich_text": [{"type": "text", "text": {"content": f"📝 摘要 (Auto-extracted)"}}],
+            "rich_text": [{"type": "text", "text": {"content": f"📝 Abstract (Auto-extracted)"}}],
             "children": [
                 {"object": "block", "type": "paragraph",
                  "paragraph": {"rich_text": [{"type": "text", "text": {"content": abstract if abstract else "(No abstract available)"}}]}}
@@ -326,7 +326,7 @@ def paper_to_notion_blocks(paper, index=1):
     })
 
     if abstract:
-        # Toggle: 方法论拆解
+        # Toggle: Methodology Breakdown
         methods_text = "**Methodology Breakdown**\n\n"
         lower = abstract.lower()
         if any(t in lower for t in ["bouc-wen","preisach","prandtl-ishlinskii"]):
@@ -344,7 +344,7 @@ def paper_to_notion_blocks(paper, index=1):
             "object": "block",
             "type": "toggle",
             "toggle": {
-                "rich_text": [{"type": "text", "text": {"content": "🔬 方法论拆解"}}],
+                "rich_text": [{"type": "text", "text": {"content": "🔬 Methodology Dismantling"}}],
                 "children": [
                     {"object": "block", "type": "paragraph",
                      "paragraph": {"rich_text": [{"type": "text", "text": {"content": methods_text}}]}}
@@ -352,11 +352,11 @@ def paper_to_notion_blocks(paper, index=1):
             }
         })
 
-    # 相关度评分表
+    # Relevance rating table
     children.append({
         "object": "block",
         "type": "heading_3",
-        "heading_3": {"rich_text": [{"type": "text", "text": {"content": "🎯 研究方向相关度"}}]}
+        "heading_3": {"rich_text": [{"type": "text", "text": {"content": "🎯Relevance of research direction"}}]}
     })
 
     # Table
@@ -369,32 +369,32 @@ def paper_to_notion_blocks(paper, index=1):
             "has_row_header": False,
             "children": [
                 {"type": "table_row", "table_row": {"cells": [
-                    [{"type": "text", "text": {"content": "方向"}}],
-                    [{"type": "text", "text": {"content": "评估"}}],
-                    [{"type": "text", "text": {"content": "说明"}}]
+                    [{"type": "text", "text": {"content": "direction"}}],
+                    [{"type": "text", "text": {"content": "evaluation"}}],
+                    [{"type": "text", "text": {"content": "Description"}}]
                 ]}},
                 {"type": "table_row", "table_row": {"cells": [
-                    [{"type": "text", "text": {"content": "压电执行器控制"}}],
+                    [{"type": "text", "text": {"content": "Piezoelectric actuator control"}}],
                     [{"type": "text", "text": {"content": "★★★★★" if "piezoelectric" in text else "★★★☆☆"}}],
-                    [{"type": "text", "text": {"content": "核心对象" if "piezoelectric" in text else "间接相关"}}]
+                    [{"type": "text", "text": {"content": "core object" if "piezoelectric" in text else "indirectly related"}}]
                 ]}},
                 {"type": "table_row", "table_row": {"cells": [
-                    [{"type": "text", "text": {"content": "Bouc-Wen迟滞逆模型"}}],
+                    [{"type": "text", "text": {"content": "Bouc-Wen hysteresis inverse model"}}],
                     [{"type": "text", "text": {"content": "★★★★★" if "bouc-wen" in text else "★★★☆☆"}}],
-                    [{"type": "text", "text": {"content": "BW建模" if "bouc-wen" in text else "其他模型"}}]
+                    [{"type": "text", "text": {"content": "BW Modeling" if "bouc-wen" in text else "Other Models"}}]
                 ]}},
                 {"type": "table_row", "table_row": {"cells": [
-                    [{"type": "text", "text": {"content": "PMN材料执行器"}}],
+                    [{"type": "text", "text": {"content": "PMN Material Actuator"}}],
                     [{"type": "text", "text": {"content": "★★★★☆" if "pmn" in text else "★★☆☆☆"}}],
-                    [{"type": "text", "text": {"content": "涉及材料" if "pmn" in text else "未涉及PMN材料"}}]
+                    [{"type": "text", "text": {"content": "Materials involved" if "pmn" in text else "PMN materials not involved"}}]
                 ]}},
                 {"type": "table_row", "table_row": {"cells": [
-                    [{"type": "text", "text": {"content": "控制算法"}}],
+                    [{"type": "text", "text": {"content": "Control algorithm"}}],
                     [{"type": "text", "text": {"content": "★★★★★" if "control" in text else "★★★☆☆"}}],
-                    [{"type": "text", "text": {"content": "控制方法" if "control" in text else "部分相关"}}]
+                    [{"type": "text", "text": {"content": "Control method" if "control" in text else "Partially related"}}]
                 ]}},
                 {"type": "table_row", "table_row": {"cells": [
-                    [{"type": "text", "text": {"content": "综合评分"}}],
+                    [{"type": "text", "text": {"content": "Comprehensive Rating"}}],
                     [{"type": "text", "text": {"content": stars}}],
                     [{"type": "text", "text": {"content": f"Match {score}/10 keywords"}}]
                 ]}}
@@ -404,11 +404,11 @@ def paper_to_notion_blocks(paper, index=1):
 
     children.append({"object": "block", "type": "divider", "divider": {}})
 
-    # 链接
+    # Link
     children.append({
         "object": "block",
         "type": "heading_3",
-        "heading_3": {"rich_text": [{"type": "text", "text": {"content": "🔗 链接"}}]}
+        "heading_3": {"rich_text": [{"type": "text", "text": {"content": "🔗 Link"}}]}
     })
 
     links = []
@@ -433,7 +433,7 @@ def paper_to_notion_blocks(paper, index=1):
 
     children.append({"object": "block", "type": "divider", "divider": {}})
 
-    # 脚注
+    # footnote
     children.append({
         "object": "block",
         "type": "paragraph",
@@ -447,21 +447,21 @@ def paper_to_notion_blocks(paper, index=1):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Notion 论文导出器")
+    parser = argparse.ArgumentParser(description="Notion paper exporter")
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--search", help="搜索关键词并导出")
-    group.add_argument("--analyze", action="store_true", help="分析单篇论文")
-    group.add_argument("--attachment", help="本地 .md 文件路径 → 模式B: 以 code blocks 附件上传")
-    group.add_argument("--batch", help="批量处理 JSON 文件")
-    parser.add_argument("--doi", help="DOI (配合 --analyze)")
-    parser.add_argument("--sid", help="S2 Paper ID (配合 --analyze)")
-    parser.add_argument("--max", type=int, default=3, help="最大结果数 (search 模式)")
-    parser.add_argument("--year", type=int, help="起始年份")
-    parser.add_argument("--parent-page", help="Notion 父页面 ID")
-    parser.add_argument("--dry-run", action="store_true", help="只显示内容，不写入 Notion")
+    group.add_argument("--search", help="Search keywords and export")
+    group.add_argument("--analyze", action="store_true", help="Analyze a single paper")
+    group.add_argument("--attachment", help="Local .md file path → Mode B: Upload as code blocks attachment")
+    group.add_argument("--batch", help="Batch processing JSON files")
+    parser.add_argument("--doi", help="DOI (with --analyze)")
+    parser.add_argument("--sid", help="S2 Paper ID (with --analyze)")
+    parser.add_argument("--max", type=int, default=3, help="Maximum number of results (search mode)")
+    parser.add_argument("--year", type=int, help="start year")
+    parser.add_argument("--parent-page", help="Notion parent page ID")
+    parser.add_argument("--dry-run", action="store_true", help="Only display content, do not write Notion")
     args = parser.parse_args()
 
-    # ==== 模式B: 附件上传 ====
+    # ==== Mode B: Attachment upload ====
     if args.attachment:
         if args.dry_run:
             md_path = args.attachment
@@ -476,7 +476,7 @@ def main():
             export_attachment(args.attachment, args.parent_page)
         return
 
-    # ==== 模式A: 搜索/分析 → 富文本导出 ====
+    # ==== Mode A: Search/Analysis → Rich Text Export ====
     papers = []
 
     if args.search:

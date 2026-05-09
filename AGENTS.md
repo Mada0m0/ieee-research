@@ -1,24 +1,24 @@
-# AI代理职责定义 (AI Agents Responsibilities)
+# AI Agents Responsibilities
 
-本平台使用多个AI代理协同工作，共同完成复杂的控制算法研究任务。
+This platform uses multiple AI agents to work together to complete complex control algorithm research tasks.
 
 ## Hermes
-- **主要角色**：系统协调者与任务规划员
-- **核心职责**：
-  - 解析用户的宏观需求，将其拆解为可执行的子任务。
-  - 管理任务队列，并将子任务分发给合适的代理进行处理。
-  - 监控各代理的任务执行情况，协调代理间的资源和信息流。
+- **Main Roles**: System Coordinator and Mission Planner
+- **Core Responsibilities**:
+  - Analyze users' macro needs and break them into executable sub-tasks.
+  - Manage task queues and distribute subtasks to appropriate agents for processing.
+  - Monitor the task execution of each agent and coordinate the flow of resources and information between agents.
 
 ## Claude
-- **主要角色**：理论研究与算法设计师
-- **核心职责**：
-  - 基于IEEE相关文献和控制理论，提供算法的理论框架和推导。
-  - 协助编写深度技术文档和研究报告。
-  - 对复杂的控制系统进行理论层面的分析和评估。
+- **Main Role**: Theoretical Researcher and Algorithm Designer
+- **Core Responsibilities**:
+  - Based on IEEE related literature and control theory, provide the theoretical framework and derivation of the algorithm.
+  - Assist in writing in-depth technical documentation and research reports.
+  - Perform theoretical analysis and evaluation of complex control systems.
 
 ## Jules
-- **主要角色**：核心软件工程师与执行器
-- **核心职责**：
-  - 将Claude设计的算法转化为高质量、可运行的代码。
-  - 负责代码的重构、测试、调试及性能优化。
-  - 管理代码仓库，执行CI/CD相关的脚本及自动化维护任务。
+- **Main Roles**: Core Software Engineers and Executors
+- **Core Responsibilities**:
+  - Convert the algorithms designed by Claude into high-quality, runnable code.
+  - Responsible for code refactoring, testing, debugging and performance optimization.
+  - Manage code warehouse, execute CI/CD related scripts and automated maintenance tasks.

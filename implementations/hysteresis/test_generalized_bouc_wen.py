@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from .generalized_bouc_wen import GeneralizedBoucWen
+from implementations.hysteresis.generalized_bouc_wen import GeneralizedBoucWen
 
 class TestGeneralizedBoucWen(unittest.TestCase):
 

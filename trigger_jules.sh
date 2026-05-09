@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
-# Jules API 触发脚本
-# 用法: bash trigger_jules.sh <job_file.json>
-# 需要: JULES_API_KEY 环境变量
+# Jules API trigger script
+# Usage: bash trigger_jules.sh <job_file.json>
+# Requires: JULES_API_KEY environment variable
 
 set -e
 
-API_KEY="${JULES_API_KEY:?需设置 JULES_API_KEY 环境变量}"
+API_KEY="${JULES_API_KEY:?Need to set JULES_API_KEY environment variable}"
 JOB_FILE="$1"
 
 if [ -z "$JOB_FILE" ]; then
-    echo "用法: bash trigger_jules.sh <job_file.json>"
+    echo "Usage: bash trigger_jules.sh <job_file.json>"
     echo ""
-    echo "可用 jobs:"
+    echo "Available jobs:"
     ls jules_jobs/*.json | while read f; do
         echo "  $(basename $f)"
     done
     exit 1
 fi
 
-echo "📤 发送任务到 Jules..."
+echo "📤 Send task to Jules..."
 echo "    Job: $JOB_FILE"
 
 RESULT=$(curl -s -X POST https://jules.googleapis.com/v1alpha/sessions \
@@ -30,6 +30,6 @@ SESSION_ID=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin
 SESSION_URL=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('url',''))" 2>/dev/null)
 
 echo ""
-echo "✅ 任务已发送！"
+echo "✅ Task has been sent!"
 echo "   Session: $SESSION_ID"
-echo "   监控: $SESSION_URL"
+echo "Monitor: $SESSION_URL"

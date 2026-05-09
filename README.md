@@ -1,5 +1,7 @@
 # IEEE Control Algorithm Research Hub
 
+[🇨🇳 中文](README_zh-CN.md) | [🇺🇸 English](README.md)
+
 ![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)
 ![Jules API](https://img.shields.io/badge/AI_Agent-Jules-orange.svg)
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-brightgreen.svg)

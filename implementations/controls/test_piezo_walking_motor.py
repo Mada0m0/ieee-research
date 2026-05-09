@@ -86,7 +86,7 @@ class TestWalkingMotorESO(unittest.TestCase):
         self.eso = WalkingMotorESO(w0=100.0, dt=self.dt)
 
     def test_eso_convergence(self):
-        # 初始状态全0，给一个测量的稳态输入，看看状态是否向其收敛
+        # The initial state is all 0, give a measured steady-state input, and see if the state converges to it.
         y_meas = 1.0
         u = 0.0
         for _ in range(100):
@@ -112,8 +112,8 @@ class TestWalkingMotorADRC(unittest.TestCase):
         self.assertGreater(next_u, 0.0)
 
     def test_sudden_load_disturbance(self):
-        """突加负载抗扰测试 (Sudden load disturbance testing)"""
-        # 测试在给定目标下，当受到内部和外部扰动时，ADRC能进行补偿
+        """Sudden load disturbance testing (Sudden load disturbance testing)"""
+        # Test that under a given target, ADRC can compensate when subjected to internal and external disturbances
 
         # Use target and current_y that won't clip the PD controller output (+/- 150)
         target_pos = 1.0
@@ -131,7 +131,7 @@ class TestWalkingMotorADRC(unittest.TestCase):
         self.assertLess(next_u_disturbed, next_u_initial)
 
     def test_step_consistency(self):
-        """步距一致性对比 (Open-loop vs ADRC step consistency comparison)"""
+        """Open-loop vs ADRC step consistency comparison"""
         # A mock test showing how step consistency might be evaluated
         # This just verifies the logic paths for ADRC vs Open loop
         open_loop_u = 100.0
@@ -149,7 +149,7 @@ class TestWalkingMotorADRC(unittest.TestCase):
 
 class TestWalkingMotorOptimizer(unittest.TestCase):
     def test_optimizer_runs(self):
-        # 简单测试优化器是否能正常运行并返回合理结果
+        # Simple test whether the optimizer can run normally and return reasonable results
         plant = WalkingPiezoMotorPlant()
         controller = WalkingGaitController()
         optimizer = WalkingMotorOptimizer(plant, controller)

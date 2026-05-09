@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""论文深度分析器 — 通过 Semantic Scholar / DOI / arXiv ID
-用法:
+"""Dissertation Deep Analyzer — via Semantic Scholar / DOI / arXiv ID
+usage:
     python paper_analyzer.py --doi "10.1109/ACCESS.2020.2984645"
     python paper_analyzer.py --sid f90836176af876cc622b7b1587641cce26e4564f
     python paper_analyzer.py --arxiv "2402.03300"
@@ -60,20 +60,20 @@ def fetch_recommendations(pos_ids, neg_ids=None, limit=10):
 
 
 def extract_keywords(text):
-    """从摘要中自动提取关键术语"""
+    """Automatically extract key terms from abstracts"""
     tech_terms = {
-        "piezoelectric": "压电", "actuator": "执行器", "hysteresis": "迟滞",
-        "Bouc-Wen": "Bouc-Wen模型", "PMN-PT": "PMN-PT材料",
-        "nonlinear": "非线性", "compensation": "补偿", "inverse": "逆模型",
-        "adaptive control": "自适应控制", "sliding mode": "滑模控制",
-        "fuzzy": "模糊", "neural network": "神经网络",
-        "PID": "PID控制", "robust": "鲁棒", "optimization": "优化",
-        "positioning": "定位", "tracking": "跟踪", "vibration": "振动",
-        "precision": "精密", "rate-dependent": "速率依赖",
-        "ferroelectric": "铁电", "relaxor": "弛豫", "shear": "剪切",
-        "Preisach": "Preisach模型", "Prandtl-Ishlinskii": "PI模型",
-        "feedforward": "前馈", "feedback": "反馈", "observer": "观测器",
-        "lead magnesium niobate": "铌镁酸铅", "control algorithm": "控制算法",
+        "piezoelectric": "piezoelectric", "actuator": "actuator", "hysteresis": "hysteresis",
+        "Bouc-Wen": "Bouc-Wen model", "PMN-PT": "PMN-PT material",
+        "nonlinear": "nonlinear", "compensation": "compensation", "inverse": "inverse model",
+        "adaptive control": "adaptive control", "sliding mode": "sliding mode control",
+        "fuzzy": "fuzzy", "neural network": "neural network",
+        "PID": "PID control", "robust": "robust", "optimization": "optimization",
+        "positioning": "positioning", "tracking": "tracking", "vibration": "vibration",
+        "precision": "precision", "rate-dependent": "rate-dependent",
+        "ferroelectric": "ferroelectric", "relaxor": "relaxation", "shear": "shear",
+        "Preisach": "Preisach model", "Prandtl-Ishlinskii": "PI model",
+        "feedforward": "feedforward", "feedback": "feedback", "observer": "observer",
+        "lead magnesium niobate": "lead magnesium niobate", "control algorithm": "control algorithm",
     }
     found = set()
     text_lower = text.lower()
@@ -84,26 +84,26 @@ def extract_keywords(text):
 
 
 def classify_methodology(abstract):
-    """从摘要推断方法论"""
+    """Inferring methodology from abstract"""
     lower = abstract.lower()
     methods = []
     if any(t in lower for t in ["bouc-wen", "preisach", "prandtl-ishlinskii"]):
-        methods.append("迟滞建模 (Hysteresis Modeling)")
+        methods.append("Hysteresis Modeling")
     if any(t in lower for t in ["inverse", "compensation", "feedforward"]):
-        methods.append("迟滞补偿/前馈 (Compensation/Feedforward)")
+        methods.append("Hysteresis compensation/feedforward (Compensation/Feedforward)")
     if any(t in lower for t in ["adaptive", "neural network", "fuzzy", "sliding mode", "pid"]):
-        methods.append("智能控制 (Adaptive/NN/Fuzzy/SMC)")
+        methods.append("Intelligent Control (Adaptive/NN/Fuzzy/SMC)")
     if any(t in lower for t in ["optimization", "identification", "parameter"]):
-        methods.append("参数辨识/优化 (Identification/Optimization)")
+        methods.append("Parameter Identification/Optimization (Identification/Optimization)")
     if any(t in lower for t in ["experiment", "numerical", "simulation"]):
-        methods.append("实验验证 (Experimental Validation)")
+        methods.append("Experimental Validation")
     if any(t in lower for t in ["rate-dependent", "frequency"]):
-        methods.append("速率/频率依赖分析")
-    return methods if methods else ["通用分析方法"]
+        methods.append("Rate/frequency dependence analysis")
+    return methods if methods else ["General analysis methods"]
 
 
 def extract_innovation(abstract):
-    """从摘要中提取创新点"""
+    """Extract innovative points from the abstract"""
     lower = abstract.lower()
     innovations = []
     markers = ["propose", "novel", "new", "introduce", "develop", "first", "improved",
@@ -117,7 +117,7 @@ def extract_innovation(abstract):
 
 
 def format_analysis(paper, lang="zh"):
-    """生成深度分析 markdown"""
+    """Generate in-depth analysis markdown"""
     title = paper.get("title", "N/A")
     year = paper.get("year", "???")
     authors = [a.get("name", "") for a in paper.get("authors", [])]
@@ -148,86 +148,86 @@ def format_analysis(paper, lang="zh"):
     relevance_score = sum(1 for t in rel_terms if t in text)
     relevance = "★★★★★" if relevance_score >= 8 else ("★★★★☆" if relevance_score >= 6 else ("★★★☆☆" if relevance_score >= 4 else "★★☆☆☆"))
 
-    cn_title = "论文深度分析报告" if lang == "zh" else "Paper Deep Analysis Report"
+    cn_title = "Paper Deep Analysis Report" if lang == "zh" else "Paper Deep Analysis Report"
 
     output = f"""# {cn_title}
 
-## 📄 论文信息
+## 📄 Paper information
 
-| 属性 | 内容 |
+| Properties | Content |
 |------|------|
-| **标题** | {title} |
-| **作者** | {', '.join(authors[:4])}{'... +' + str(len(authors)-4) + ' more' if len(authors) > 4 else ''} |
-| **发表** | {venue_name} ({year}) |
+| **Title** | {title} |
+| **Authors** | {', '.join(authors[:4])}{'... +' + str(len(authors)-4) + ' more' if len(authors) > 4 else ''} |
+| **Posted** | {venue_name} ({year}) |
 | **DOI** | [{doi}](https://doi.org/{doi}) |
-| **引用数** | {citations} (references: {refs}) |
-| **类型** | {', '.join(pub_types) if pub_types else 'N/A'} |
-| **研究领域** | {', '.join(fields[:4]) if fields else 'N/A'} |
+| **Number of citations** | {citations} (references: {refs}) |
+| **Type** | {', '.join(pub_types) if pub_types else 'N/A'} |
+| **Research Field** | {', '.join(fields[:4]) if fields else 'N/A'} |
 | **Open Access** | {oa_status}{': ' + oa_url if oa_url else ''} |
-| **发布日期** | {pub_date} |
+| **Publish Date** | {pub_date} |
 
 """
     if arxiv:
         output += f"- **arXiv**: [{arxiv}](https://arxiv.org/abs/{arxiv})\n\n"
 
     if tldr and tldr.get("text"):
-        output += f"""## 🤖 TL;DR (AI 总结)
+        output += f"""## 🤖 TL;DR (AI summary)
 
 > {tldr['text']}
 
 """
 
-    output += f"""## 📝 摘要原文
+    output += f"""## 📝 Original summary
 
-{abstract if abstract else '(未提供摘要)'}
+{abstract if abstract else '(No abstract provided)'}
 
 """
 
     if keywords:
         kw_cn = ", ".join(f"{e}({c})" for e, c in keywords[:15])
-        output += f"""## 🏷️ 关键词自动提取
+        output += f"""## 🏷️ Automatic extraction of keywords
 
 {kw_cn}
 
 """
 
-    output += f"""## 🔬 方法论分析
+    output += f"""## 🔬 Methodological analysis
 
 """
     for m in methods:
         output += f"- ✅ {m}\n"
     output += "\n"
     for i, inn in enumerate(innovations, 1):
-        output += f"### 创新点 {i}\n{inn}\n\n"
+        output += f"### Innovation {i}\n{inn}\n\n"
 
-    output += f"""## 🎯 与研究方向相关度
+    output += f"""## 🎯 Relevance to research direction
 
-| 方向 | 相关度 | 说明 |
+| Direction | Relevance | Description |
 |------|--------|------|
-| 压电执行器控制 | {"★★★★★" if any(t in text for t in ["piezoelectric actuator", "positioning", "tracking"]) else "★★★☆☆"} | {"直接相关" if "piezoelectric" in text.lower() else "部分相关"} |
-| Bouc-Wen迟滞逆模型 | {"★★★★★" if "bouc-wen" in text.lower() else "★★★☆☆"} | {"Bouc-Wen 建模" if "bouc-wen" in text.lower() else "其他迟滞模型"} |
-| PMN材料 | {"★★★★☆" if "pmn" in text.lower() else "★★☆☆☆"} | {"涉及PMN" if "pmn" in text.lower() else "未涉及PMN"} |
-| 控制算法 | {"★★★★★" if any(t in text for t in ["control", "adaptive", "fuzzy", "neural", "sliding"]) else "★★★☆☆"} | {"控制算法" if "control" in text.lower() else "未涉及"} |
-| 综合评分 | **{relevance}** | 匹配 {relevance_score}/{len(rel_terms)} 个核心关键词 |
+| Piezoelectric actuator control | {"★★★★★" if any(t in text for t in ["piezoelectric actuator", "positioning", "tracking"]) else "★★★☆☆"} | {"Directly related" if "piezoelectric" in text.lower() else "Partially related"} |
+| Bouc-Wen hysteresis inverse model | {"★★★★★" if "bouc-wen" in text.lower() else "★★★☆☆"} | {"Bouc-Wen modeling" if "bouc-wen" in text.lower() else "Other hysteresis models"} |
+| PMN material | {"★★★★☆" if "pmn" in text.lower() else "★★☆☆☆"} | {"PMN involved" if "pmn" in text.lower() else "PMN not involved"} |
+| Control algorithm | {"★★★★★" if any(t in text for t in ["control", "adaptive", "fuzzy", "neural", "sliding"]) else "★★★☆☆"} | {"Control algorithm" if "control" in text.lower() else "Not involved"} |
+| Comprehensive score | **{relevance}** | Match {relevance_score}/{len(rel_terms)} core keywords |
 
-## 🔑 可借鉴之处
+## 🔑 Lessons to learn from
 
 """
     if "bouc-wen" in text.lower():
-        output += "- ✅ Bouc-Wen 模型的参数辨识方法和验证流程可参考\n"
+        output += "- ✅ The parameter identification method and verification process of the Bouc-Wen model can be referred to\n"
     if "inverse" in text.lower() or "compensation" in text.lower():
-        output += "- ✅ 迟滞逆模型补偿的前馈+反馈控制架构值得借鉴\n"
+        output += "- ✅ The feedforward + feedback control architecture of hysteresis inverse model compensation is worth learning\n"
     if "adaptive" in text.lower() or "neural" in text.lower() or "fuzzy" in text.lower():
-        output += "- ✅ 智能控制算法 (Adaptive/Fuzzy-NN/SMC) 在压电平台上的实现方法可参考\n"
+        output += "- ✅ For the implementation method of intelligent control algorithm (Adaptive/Fuzzy-NN/SMC) on the piezoelectric platform, please refer to\n"
     if "experiment" in text.lower():
-        output += "- ✅ 实验验证方案和硬件平台可做参考\n"
+        output += "- ✅ Experimental verification scheme and hardware platform can be used as reference\n"
     if "rate-dependent" in text.lower():
-        output += "- ✅ 速率依赖迟滞的处理方法值得关注\n"
-    output += "- 📌 该论文在迟滞建模与控制补偿方面的框架具有通用参考价值\n\n"
+        output += "- ✅ The handling of rate-dependent hysteresis deserves attention\n"
+    output += "- 📌 The framework of this paper in terms of hysteresis modeling and control compensation has general reference value\n\n"
 
-    output += f"""## 🔗 所有链接
+    output += f"""## 🔗 All links
 
-| 平台 | 链接 |
+| Platform | Link |
 |------|------|
 | Semantic Scholar | https://www.semanticscholar.org/paper/{paper_id} |
 | DOI | https://doi.org/{doi} |
@@ -239,20 +239,20 @@ def format_analysis(paper, lang="zh"):
         output += f"| Open Access PDF | {oa_url} |\n"
 
     output += f"""\n---
-*分析时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | 工具: Hermes Agent ieee-search v2.0*\n"""
+*Analysis time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Tool: Hermes Agent ieee-search v2.0*\n"""
 
     return output
 
 
 def main():
-    parser = argparse.ArgumentParser(description="论文深度分析器")
+    parser = argparse.ArgumentParser(description="Paper depth analyzer")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--doi", help="DOI")
     group.add_argument("--sid", help="Semantic Scholar Paper ID")
     group.add_argument("--arxiv", help="arXiv ID")
-    parser.add_argument("--lang", choices=["zh", "en"], default="zh", help="输出语言")
-    parser.add_argument("--output", help="输出文件")
-    parser.add_argument("--with-citations", action="store_true", help="同时获取引用网络")
+    parser.add_argument("--lang", choices=["zh", "en"], default="zh", help="Output Language")
+    parser.add_argument("--output", help="output file")
+    parser.add_argument("--with-citations", action="store_true", help="Get citation network at the same time")
     args = parser.parse_args()
 
     print(f"\n  Analyzing paper via ieee-search v2.0...")
@@ -284,12 +284,12 @@ def main():
         try:
             cites = fetch_citations(pid)
             refs = fetch_references(pid)
-            report += "\n\n## 📊 引用网络\n\n"
-            report += "### 被以下论文引用 (Top 5)\n"
+            report += "\n\n## 📊 Reference network\n\n"
+            report += "### is cited by the following papers (Top 5)\n"
             for c in cites.get("data", [])[:5]:
                 cp = c.get("citingPaper", {})
                 report += f"- [{cp.get('title','?')}]({cp.get('url','')}) ({cp.get('year','?')})\n"
-            report += "\n### 引用以下论文 (Top 5)\n"
+            report += "\n### Quote the following papers (Top 5)\n"
             for r in refs.get("data", [])[:5]:
                 rp = r.get("citedPaper", {})
                 report += f"- [{rp.get('title','?')}]({rp.get('url','')}) ({rp.get('year','?')})\n"

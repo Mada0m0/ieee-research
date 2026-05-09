@@ -39,7 +39,7 @@ where x is input displacement, z is hysteresis state, y is output force.
 3. Complete experimental validation on bi-morph PA setup
 
 ## Relevance
-- ★★★★★ 压电执行器控制 — 直接相关
-- ★★★★★ Bouc-Wen迟滞模型 — 核心算法
-- ★★★★★ 控制算法 — RMSO + Fuzzy-NN
-- ★★☆☆☆ PMN材料 — 未涉及
+- ★★★★★ Piezoelectric Actuator Control – Directly Related
+- ★★★★★ Bouc-Wen hysteresis model — core algorithm
+- ★★★★★ Control algorithm — RMSO + Fuzzy-NN
+- ★★☆☆☆ PMN material — not covered

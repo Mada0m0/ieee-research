@@ -1,5 +1,5 @@
 {
-  "prompt": "在 ieee-research 仓库的 implementations/hysteresis/ 目录下，创建 generalized_bouc_wen.py 文件。实现 Generalized Bouc-Wen 迟滞模型，包括经典BW参数(alpha, beta, gamma, n, A)、非对称项和IIR滤波器。包含 simulate() 方法进行迟滞模拟，以及基于PSO的参数辨识方法。再创建一个 test_generalized_bouc_wen.py 包含单元测试。分支名 feat/generalized-boucwen。",
+  "prompt": "In the implementations/hysteresis/ directory of the ieee-research warehouse, create the generalized_bouc_wen.py file. Implements the Generalized Bouc-Wen hysteresis model, including classic BW parameters (alpha, beta, gamma, n, A), asymmetric terms and IIR filters. Contains the simulate() method for hysteresis simulation and PSO-based parameter identification method. Create another test_generalized_bouc_wen.py containing unit tests. Branch name feat/generalized-boucwen.",
   "sourceContext": {
     "source": "sources/github/Mada0m0/ieee-research",
     "githubRepoContext": {

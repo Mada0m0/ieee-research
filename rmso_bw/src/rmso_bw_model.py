@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Optional, Tuple, Dict, List
 
-from implementations.hysteresis.rmso_optimizer import RMSOOptimizer
+from rmso_bw.src.rmso_optimizer import RMSOOptimizer
 
 
 class RMSO_BW_Model:

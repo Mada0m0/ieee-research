@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
-from implementations.hysteresis.rmso_optimizer import RMSOOptimizer
-from implementations.hysteresis.rmso_bw_model import RMSO_BW_Model
-from implementations.controls.fuzzy_nn_controller import FuzzyNNController
-from implementations.controls.rmso_bw_compensator import RMSO_BW_Compensator
+from rmso_bw.src.rmso_optimizer import RMSOOptimizer
+from rmso_bw.src.rmso_bw_model import RMSO_BW_Model
+from rmso_bw.src.fuzzy_nn_controller import FuzzyNNController
+from rmso_bw.src.rmso_bw_compensator import RMSO_BW_Compensator
 
 @pytest.fixture(autouse=True)
 def set_seed():

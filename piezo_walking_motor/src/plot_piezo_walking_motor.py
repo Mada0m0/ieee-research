@@ -1,6 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from implementations.controls.piezo_walking_motor import (
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+from piezo_walking_motor.src.piezo_walking_motor import (
     WalkingPiezoMotorPlant,
     WalkingGaitController,
     WalkingMotorADRC

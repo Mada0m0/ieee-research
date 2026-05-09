@@ -1,6 +1,11 @@
 import numpy as np
 import pytest
-from pmn_pt_shear_actuator import (
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+from pmn_pt_shear_actuator.src.pmn_pt_shear_actuator import (
     ShearActuatorPlant,
     ShearHysteresisCompensator,
     ShearMotorESO,

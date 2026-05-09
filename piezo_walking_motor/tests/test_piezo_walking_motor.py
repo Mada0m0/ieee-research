@@ -1,7 +1,11 @@
 import unittest
 import numpy as np
+import sys
+import os
 
-from implementations.controls.piezo_walking_motor import (
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+from piezo_walking_motor.src.piezo_walking_motor import (
     WalkingPiezoMotorPlant,
     WalkingGaitController,
     WalkingMotorESO,

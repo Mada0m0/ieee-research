@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from implementations.voltage_waveform.generators import TrapezoidalWaveGenerator, SawtoothWaveGenerator
+from voltage_waveform.src.generators import TrapezoidalWaveGenerator, SawtoothWaveGenerator
 
 def test_trapezoidal_wave_generator_initialization():
     """测试梯形波生成器初始化和参数异常处理"""

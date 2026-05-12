@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""IEEE/academic paper multi-source search — Semantic Scholar API (covers IEEE + all publishers)
-usage:
+"""IEEE/学术论文多源搜索 — Semantic Scholar API (覆盖 IEEE + 全部出版商)
+用法:
     python ieee_search.py "piezoelectric actuator control" --max 10 --year 2020
     python ieee_search.py "Bouc-Wen hysteresis model" --field Engineering --min-citations 5
     python ieee_search.py "PMN-PT actuator" --venue-filter IEEE --output results.json
     python ieee_search.py "precision positioning" --sort citations
-    python ieee_search.py ​​--batch keywords.txt --max 5 # Batch search
+    python ieee_search.py --batch keywords.txt --max 5  # Batch search
 """
 
 import sys, os, json, argparse, urllib.request, urllib.parse, time
@@ -71,17 +71,17 @@ def _search_semantic_scholar(query, max_results=5, year=None, field=None,
 
 def _search_openalex(query, max_results=5, year=None, field=None,
                     min_citations=0, sort="relevance", venue_filter=None):
-    """Search papers via OpenAlex API"""
+    """Search papers via the OpenAlex API"""
     # Build API parameters
     params = {"search": query, "per-page": str(max_results), "mailto": "hermes-agent@nousresearch.com"}
     
-    # sort map
+    # sorting map
     sort_map = {"relevance": "relevance_score", "citations": "cited_by_count:desc",
                 "date": "publication_year:desc", "recency": "publication_date:desc"}
     sort_val = sort_map.get(sort, "relevance_score")
     params["sort"] = sort_val
     
-    #Field filtering (OpenAlex uses concept ID)
+    # Domain filtering (OpenAlex uses concept ID)
     if field:
         field_map = {
             "Engineering": "C154945302",
@@ -94,7 +94,7 @@ def _search_openalex(query, max_results=5, year=None, field=None,
         if concept_id:
             params["filter"] = f"concepts.id:{concept_id}"
     
-    # Year filter
+    # year filter
     if year:
         year_filter = f"from_publication_date:{year}-01-01"
         if "filter" in params:
@@ -111,11 +111,11 @@ def _search_openalex(query, max_results=5, year=None, field=None,
     with urllib.request.urlopen(req, timeout=15) as resp:
         data = json.loads(resp.read())
     
-    # Process results
+    # Processing results
     works = data.get("results", [])
     papers = []
     for work in works:
-        # Convert to a format similar to Semantic Scholar
+        # Convert to Semantic Scholar-like format
         paper = {
             "title": work.get("title", ""),
             "year": work.get("publication_year", ""),
@@ -128,7 +128,7 @@ def _search_openalex(query, max_results=5, year=None, field=None,
         }
         papers.append(paper)
     
-    #Journal filter
+    # Journal filter
     if venue_filter:
         papers = [p for p in papers if venue_filter.lower() in 
                   str(p.get("journal", {}).get("name", "")).lower()]
@@ -142,7 +142,7 @@ def _search_openalex(query, max_results=5, year=None, field=None,
 
 
 def format_paper(paper, index=1, detailed=True):
-    """Formatting a single paper (rich output)"""
+    """格式化单篇论文 (rich output)"""
     title = paper.get("title", "N/A")
     year = paper.get("year", "???")
     citations = paper.get("citationCount", 0)
@@ -158,7 +158,7 @@ def format_paper(paper, index=1, detailed=True):
     authors = [a.get("name", "") for a in paper.get("authors", [])]
     author_str = ", ".join(authors[:3])
     if len(authors) > 3:
-        author_str += f" et al. ({len(authors)} authors)"
+        author_str += f"Waiting for {len(authors)} people"
 
     ext_ids = paper.get("externalIds", {})
     doi = ext_ids.get("DOI", "")
@@ -215,7 +215,7 @@ def format_paper(paper, index=1, detailed=True):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="IEEE/Academic Paper Multi-Source Search v2.0",
+    parser = argparse.ArgumentParser(description="IEEE/academic paper multi-source search v2.0",
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
                                      epilog="""
 Examples:
@@ -224,19 +224,19 @@ Examples:
   python ieee_search.py "PMN-PT actuator" --sort citations --output results.json
   python ieee_search.py --batch keywords.txt --year 2020 --max 5
 """)
-    parser.add_argument("query", nargs="?", help="search keywords")
-    parser.add_argument("--max", type=int, default=8, help="Maximum number of results (default 8)")
-    parser.add_argument("--year", type=int, help="start year")
-    parser.add_argument("--field", help="Research field (such as Engineering, Materials Science)")
-    parser.add_argument("--min-citations", type=int, default=0, help="Minimum number of citations")
+    parser.add_argument("query", nargs="?", help="搜索关键词")
+    parser.add_argument("--max", type=int, default=8, help="最大结果数 (默认8)")
+    parser.add_argument("--year", type=int, help="起始年份")
+    parser.add_argument("--field", help="研究领域 (如 Engineering, Materials Science)")
+    parser.add_argument("--min-citations", type=int, default=0, help="最低引用数")
     parser.add_argument("--sort", choices=["relevance","citations","date","recency"],
-                       default="relevance", help="Sort by")
-    parser.add_argument("--venue-filter", help="Journal/Publisher filter (e.g. IEEE, Elsevier)")
-    parser.add_argument("--output", help="JSON output file")
-    parser.add_argument("--json", action="store_true", help="Console output JSON")
-    parser.add_argument("--batch", help="Batch search keyword files (one per line)")
-    parser.add_argument("--notion-export", action="store_true", help="Export to Notion")
-    parser.add_argument("--quiet", action="store_true", help="concise output")
+                       default="relevance", help="排序方式")
+    parser.add_argument("--venue-filter", help="期刊/出版商过滤 (如 IEEE, Elsevier)")
+    parser.add_argument("--output", help="JSON 输出文件")
+    parser.add_argument("--json", action="store_true", help="控制台输出 JSON")
+    parser.add_argument("--batch", help="批量搜索关键词文件(每行一个)")
+    parser.add_argument("--notion-export", action="store_true", help="导出到 Notion")
+    parser.add_argument("--quiet", action="store_true", help="简洁输出")
     args = parser.parse_args()
 
     queries = []

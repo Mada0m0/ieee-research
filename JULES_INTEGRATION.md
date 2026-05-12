@@ -1,4 +1,4 @@
-## Jules API Workflow
+## Jules API workflow
 
 ### Currently triggerable tasks
 
@@ -6,7 +6,7 @@
 |---|------|------|------|
 | 1 | Generalized Bouc-Wen hysteresis model | `jules_jobs/generalized_bouc_wen.json` | ✅ Ready |
 
-### Trigger method
+### Trigger mode
 
 ```bash
 # Method 1: Use script
@@ -21,6 +21,6 @@ curl -X POST https://jules.googleapis.com/v1alpha/sessions \
 ```
 
 ### Workflow description
-1. Hermes analysis paper → generate Markdown report
+1. Hermes analysis paper → Generate Markdown report
 2. Extract mathematical model → Build Jules prompt
-3. Trigger Jules → generate project code → automatically create PR
+3. Trigger Jules → Generate project code → Automatically create PR

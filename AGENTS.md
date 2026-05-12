@@ -5,14 +5,14 @@ This platform uses multiple AI agents to work together to complete complex contr
 ## Hermes
 - **Main Roles**: System Coordinator and Mission Planner
 - **Core Responsibilities**:
-  - Analyze users' macro needs and break them into executable sub-tasks.
+  - Analyze the user's macro needs and break them into executable subtasks.
   - Manage task queues and distribute subtasks to appropriate agents for processing.
   - Monitor the task execution of each agent and coordinate the flow of resources and information between agents.
 
 ## Claude
 - **Main Role**: Theoretical Researcher and Algorithm Designer
 - **Core Responsibilities**:
-  - Based on IEEE related literature and control theory, provide the theoretical framework and derivation of the algorithm.
+  - Based on IEEE related literature and control theory, the theoretical framework and derivation of the algorithm are provided.
   - Assist in writing in-depth technical documentation and research reports.
   - Perform theoretical analysis and evaluation of complex control systems.
 
@@ -21,4 +21,4 @@ This platform uses multiple AI agents to work together to complete complex contr
 - **Core Responsibilities**:
   - Convert the algorithms designed by Claude into high-quality, runnable code.
   - Responsible for code refactoring, testing, debugging and performance optimization.
-  - Manage code warehouse, execute CI/CD related scripts and automated maintenance tasks.
+  - Manage the code warehouse and execute CI/CD related scripts and automated maintenance tasks.

@@ -3,8 +3,8 @@
 IEEE Control Algorithm Research Hub
 Bridging academic research → engineering implementation
 
-Research pipeline:
-  [Paper Search] → [In-depth Analysis] → [Code Generation] → [CI/CD Verification]
+研究流水线:
+  [论文搜索] → [深度分析] → [代码生成] → [CI/CD验证]
      ieee_search.py  paper_analyzer.py   hub.py        pipeline.yml
 """
 
@@ -26,7 +26,7 @@ logger = logging.getLogger("IEEE-Hub")
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 HERMES_DIR = os.path.join(SCRIPT_DIR, "agents", "hermes")
 RESEARCH_DIR = os.path.join(SCRIPT_DIR, "research", "reports")
-IMPLEMENTATIONS_DIR = os.path.join(SCRIPT_DIR, "implementations")
+IMPLEMENTATIONS_DIR = SCRIPT_DIR
 
 
 class ResearchHub:
@@ -46,7 +46,7 @@ class ResearchHub:
         logger.info(f"🔍 Search papers: {query}")
         result = ss_search(query, max_results=max_results)
         papers = result.get("results", [])
-        logger.info(f" → {len(papers)} papers found")
+        logger.info(f"→ {len(papers)} papers found")
         return papers
 
     def analyze_paper(self, doi: str) -> str:
@@ -55,7 +55,7 @@ class ResearchHub:
         safe_doi = doi.replace("/", "_").replace(".", "_")
         output = os.path.join(RESEARCH_DIR, f"analysis_{safe_doi}.md")
 
-        logger.info(f"📖 analysis paper: {doi}")
+        logger.info(f"📖 Analysis paper: {doi}")
         result = subprocess.run(
             [sys.executable, os.path.join(HERMES_DIR, "paper_analyzer.py"),
              "--doi", doi, "--lang", "zh", "--output", output],
@@ -63,34 +63,34 @@ class ResearchHub:
         )
 
         if os.path.exists(output):
-            logger.info(f" ✅ Report saving: {output}")
+            logger.info(f"✅ Report saving: {output}")
             return output
         else:
-            logger.error(f" ❌ Analysis failed: {result.stderr[:200]}")
+            logger.error(f"❌ Analysis failed: {result.stderr[:200]}")
             return ""
 
     # ───────── Code generation phase ─────────
 
     def generate_code(self, report_path: str, category: str = "hysteresis") -> str:
         """Step 3: Extract the mathematical model from the analysis report to generate code"""
-        target_dir = os.path.join(IMPLEMENTATIONS_DIR, category)
+        target_dir = os.path.join(IMPLEMENTATIONS_DIR, category, "src")
         os.makedirs(target_dir, exist_ok=True)
 
         logger.info(f"⚙️ Generated code: {os.path.basename(report_path)} → {category}/")
 
-        # Read the report and extract the mathematical model description
+        # Read report to extract mathematical model description
         with open(report_path, encoding="utf-8") as f:
             report = f.read()
 
-        # Extract abstract and methodology parts
+        # Extract abstract and methodology sections
         sections = {"abstract": "", "methodology": "", "innovation": ""}
         current = ""
         for line in report.split("\n"):
-            if "## 📝 Original summary" in line:
+            if "# # 📝 summary" in line:
                 current = "abstract"
-            elif "## 🔬 Methodological analysis" in line:
+            elif "# # 🔬 Methodology" in line:
                 current = "methodology"
-            elif "### innovative point" in line or "## 🏷️" in line:
+            elif "# ##Innovation point" in line or "## 🏷️" in line:
                 current = "innovation"
             elif line.startswith("## ") and current:
                 current = ""
@@ -101,20 +101,20 @@ class ResearchHub:
         # Build implementation prompt
         model_name = os.path.basename(report_path).replace(".md", "")
         prompt = f"""
-Based on the analysis results of the following papers, a Python project implementation is generated:
+根据以下论文分析结果，生成 Python 工程实现：
 
-Paper abstract:
+论文摘要:
 {sections.get('abstract', '')[:1000]}
 
-Methodology:
+方法论:
 {sections.get('methodology', '')[:1000]}
 
-Require:
-1. Generate `{model_name}.py` — core algorithm module (including class definition, method, documentation string)
-2. Generate `test_{model_name}.py` — unit test (covers main functions)
-3. Generate `example_{model_name}.ipynb` — Jupyter usage example
-4. All code uses NumPy, optional SciPy
-5. Add type annotations (type hints)
+要求:
+1. 生成 `{model_name}.py` — 核心算法模块（含类定义、方法、文档字符串）
+2. 生成 `test_{model_name}.py` — 单元测试（覆盖主要功能）
+3. 生成 `example_{model_name}.ipynb` — Jupyter 使用示例
+4. 所有代码使用 NumPy，可选的 SciPy
+5. 添加类型注解(type hints)
 """
 
         # Generate code skeleton
@@ -164,15 +164,15 @@ class HysteresisModel:
         return f"<{self.__class__.__name__} | config: {self.config}>"
 '''
 
-        #Write file
+        # write file
         module_path = os.path.join(target_dir, f"{model_name}.py")
         with open(module_path, "w") as f:
             f.write(code)
 
-        logger.info(f" ✅ Module generation: {module_path}")
+        logger.info(f"✅ Module generation: {module_path}")
         return module_path
 
-    # ┌──────────────────── Batch assembly line ────────────────────────┐
+    # ┌─────────────────── Batch assembly line ───────────────────────┐
 
     def run_full_pipeline(self, query_or_doi: str, is_doi: bool = False):
         """End-to-end pipeline: Search → Analysis → Code Generation"""
@@ -189,7 +189,7 @@ class HysteresisModel:
                     if report:
                         self.generate_code(report)
 
-        logger.info("🏁 Pipeline completed!")
+        logger.info("🏁 The assembly line is completed!")
 
     # ──────── Status query ────────
 
@@ -201,10 +201,13 @@ class HysteresisModel:
                 reports.append(f)
 
         impls = []
-        for root, dirs, files in os.walk(IMPLEMENTATIONS_DIR):
-            for f in files:
-                if f.endswith(".py"):
-                    impls.append(os.path.relpath(os.path.join(root, f), IMPLEMENTATIONS_DIR))
+        for root, dirs, files in os.walk(SCRIPT_DIR):
+            if '.git' in root or 'agents' in root or 'research' in root or 'tests' in root:
+                continue
+            if 'src' in root:
+                for f in files:
+                    if f.endswith(".py"):
+                        impls.append(os.path.relpath(os.path.join(root, f), SCRIPT_DIR))
 
         return {
             "reports": len(reports),
@@ -218,11 +221,11 @@ def cli():
     import argparse
     parser = argparse.ArgumentParser(description="Research-to-Code Pipeline")
     parser.add_argument("action", choices=["search", "analyze", "pipeline", "status"],
-                       help="operation type")
-    parser.add_argument("--query", help="search keywords")
-    parser.add_argument("--doi", help="Paper DOI")
-    parser.add_argument("--max", type=int, default=5, help="Maximum number of search results")
-    parser.add_argument("--report", help="Analysis report path (with code generation)")
+                       help="Operation type")
+    parser.add_argument("--query", help="搜索关键词")
+    parser.add_argument("--doi", help="论文 DOI")
+    parser.add_argument("--max", type=int, default=5, help="最大搜索结果数")
+    parser.add_argument("--report", help="分析报告路径（配合代码生成）")
 
     args = parser.parse_args()
 
@@ -238,7 +241,7 @@ def cli():
 
     elif args.action == "analyze":
         if not args.doi:
-            print("❌ requires --doi parameter")
+            print("❌ Requires --doi parameter")
             return
         hub.analyze_paper(args.doi)
 
@@ -248,14 +251,14 @@ def cli():
         elif args.query:
             hub.run_full_pipeline(args.query)
         else:
-            print("❌ requires --doi or --query argument")
+            print("❌ Requires --doi or --query parameter")
 
     elif args.action == "status":
         s = hub.status()
         print(f"\n📊 Research hub status")
-        print(f" 📄 Analysis report: {s['reports']}")
-        print(f" ⚙️ Code implementation: {s['implementations']}")
-        print(f" 🕐 Last updated: {s['last_updated']}")
+        print(f"📄 Analysis report: {s['reports']}")
+        print(f"⚙️ Code implementation: {s['implementations']}")
+        print(f"🕐 Last updated: {s['last_updated']}")
 
 
 if __name__ == "__main__":

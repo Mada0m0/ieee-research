@@ -1,0 +1,11 @@
+{
+  "prompt": "In the piezo_stepper_eso/src/ directory of the ieee-research warehouse, create piezo_stepper_eso.py and test_piezo_stepper_eso.py.\n\nBackground: Piezoelectric stepper motors use the inverse piezoelectric effect of piezoelectric ceramics to produce tiny step displacements. Core control challenges: hysteresis nonlinearity, creep, temperature drift, external load disturbance. ESO (Extended State Observer) is the core of active disturbance rejection control (ADRC).\n\n## piezo_stepper_eso.py\n\n### 1. PiezoStepperPlant class\n- input: voltage u(t)\n- state: displacement x1, speed x2\n- Built-in simplified hysteresis nonlinearity\n- Parameters: stiffness k, damping c, piezoelectric coefficient d\n- simulate(u_seq, dt) → displacement sequence\n\n### 2. ExtendedStateObserver class\n- Third-order ESO: z1 (displacement estimate), z2 (velocity estimate), z3 (total disturbance estimate)\n- Parameter: Observer bandwidth w0\n- fal(e, alpha, delta) nonlinear function\n- update(y_meas, u) → update status\n- get_disturbance() → current disturbance estimate\n\n### 3. ESOController class\n- NLSEF control law\n- Disturbance compensation: u = u0 - z3/b0\n- Tracking differentiator TD\n- control(setpoint, y_meas, dt) → control voltage\n\n### 4. ADRController class\n- Integrated TD + ESO + NLSEF\n- Parameters: wc (control bandwidth), w0 (observer bandwidth), b0 (control gain)\n- track(reference, plant, dt) → track tracking\n\n## test_piezo_stepper_eso.py\n- ESO convergence test\n- Step response test (no overshoot)\n- Sine tracking test\n- Sudden load immunity test\n- Hysteresis compensation comparison\n\nTechnical requirements: Python 3.10+, pure NumPy, type annotations, Chinese documentation\nBranch name: feat/piezo-stepper-eso",
+  "sourceContext": {
+    "source": "sources/github/Mada0m0/ieee-research",
+    "githubRepoContext": {
+      "startingBranch": "main"
+    }
+  },
+  "title": "Piezoelectric Stepper Motor ESO Control",
+  "automationMode": "AUTO_CREATE_PR"
+}
